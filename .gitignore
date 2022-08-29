@@ -7,6 +7,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Zips
+*.zip
+
 # C extensions
 *.so
 
@@ -123,7 +126,7 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# YOLO
+# Pytorch
 *.pt
 
 # Visual Studio Code

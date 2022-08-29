@@ -26,6 +26,10 @@ def resize_image(image, scale_percent=100):
     return cv.resize(image, dsize=dim, interpolation=cv.INTER_AREA)
 
 
+def view_webcam():
+    return
+
+
 def open_webcam():
     print("webcam")
 
@@ -33,9 +37,6 @@ def open_webcam():
 def open_video(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
-        return
-
-    video = ""
 
 
 def open_image(filename):
@@ -50,12 +51,12 @@ def open_image(filename):
 
     detector = ObjectDetector(labels=OBJECTS_TO_DETECT)
     detector.detect(image)
-    # image = resize_image(image)
+    image = resize_image(image)
     cv.imshow("Image", image)
 
     k = cv.waitKey(0)
-    if k == ord("q"):
-        return
+    # if k == "ESC":
+    #     return
 
 
 if __name__ == "__main__":
