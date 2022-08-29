@@ -49,8 +49,10 @@ def open_image(filename):
     if image is None:
         sys.exit("Could not read the image")
 
-    detector = ObjectDetector(labels=OBJECTS_TO_DETECT)
-    detector.detect(image)
+    car_detector = ObjectDetector(model_path="yolov5m.pt", labels=[
+                                  "car", "motorcycle", "bus", "truck"])
+    car_results = car_detector.detect(image)
+    print(car_results)
     image = resize_image(image)
     cv.imshow("Image", image)
 

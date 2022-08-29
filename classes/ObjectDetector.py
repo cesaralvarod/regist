@@ -1,57 +1,55 @@
 import torch
 import cv2 as cv
 import numpy as np
-
-MODEL = "ultralytics/yolov5"
-YOLO_VERSION = "yolov5m"
-MODEL_PATH = "license_model.pt"
+import os
+import sys
 
 
 class ObjectDetector:
-    def __init__(self, threshold=0.45, labels=[]):
-        self.model = torch.hub.load(
-            "ultralytics/yolov5", 'custom', path="license_model.pt", force_reload=True)
-        self.results = None
-        self.objects = []
+
+    def __init__(self, model_path="", conf=0.50, labels=[]):
+        self.model_path = model_path
+        self.conf = conf if conf < 1 and conf >= 0 else 1.0
         self.labels = labels
-        self.threshold = threshold if threshold < 1 else 1.0
+        self.objects = []
+        self.results = None
+
+        self.load_model()
+
+    def load_model(self):
+        if not os.path.exists(self.model_path):
+            sys.exit("Model not found")
+
+        self.model = torch.hub.load(
+            "ultralytics/yolov5", 'custom', self.model_path, force_reload=True)
 
     def detect(self, frame, draw=True):
         self.frame = frame
         self.results = self.model(self.frame)
-        self.objects = np.array(self.results.xyxy[0])
-        self.draw_object()
+        objects = np.array(self.results.xyxy[0])
+        self.objects = []
 
-    def get_results(self):
-        return self.results
+        for obj in objects:
+            x1, y1, x2, y2, coincidence, type_obj = obj
+
+            if coincidence >= self.conf and self.model.names[type_obj] in self.labels:
+                self.draw_rectangle((int(x1), int(y1)),
+                                    (int(x2), int(y2)), thickness=2)
+                self.objects.append(obj.tolist())
+
+                # Write text
+
+                # label_text = self.set_labeltext(type_obj)
+                # roi = self.frame[int(y1):int(y2), int(x1):int(x2)]
+                # cv.rectangle(self.frame, c1,
+                #              (int(x1) + len(label_text) * 20 + 10, int(y1)-40), (0, 255, 0), -1)
+                # cv.putText(self.frame, label_text, (int(x1)+10, int(y1)-10),
+                #            cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+
+        return self.objects
+
+    def draw_rectangle(self, c1, c2, color=(0, 255, 0), thickness=1):
+        cv.rectangle(self.frame, c1, c2, color, thickness)
 
     def get_labels(self):
-        return self.labels
-
-    def read_text(self, roi):
-        gray = cv.cvtColor(roi, cv.COLOR_BGR2GRAY)
-        thresh = cv.threshold(gray, 170, 255, cv.THRESH_BINARY_INV)[1]
-        cv.imshow("thresh", gray)
-
-    def draw_object(self):
-        print(self.model.names)
-        for obj in self.objects:
-            x1, y1, x2, y2, coincidence, type_obj = obj
-            c1 = int(x1), int(y1)
-            c2 = int(x2), int(y2)
-            print(obj)
-            # if coincidence >= self.threshold and type_obj in self.labels:
-            label_text = self.set_labeltext(type_obj)
-            roi = self.frame[int(y1):int(y2), int(x1):int(x2)]
-            self.read_text(roi)
-            cv.rectangle(self.frame, c1, c2, (0, 255, 0), 1)
-            # cv.rectangle(self.frame, c1,
-            #              (int(x1) + len(label_text) * 20 + 10, int(y1)-40), (0, 255, 0), -1)
-            # cv.putText(self.frame, label_text, (int(x1)+10, int(y1)-10),
-            #            cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
-
-    def set_labeltext(self, label):
-        if label < len(self.model.names):
-            return self.model.names[label]
-        else:
-            return "unidentified"
+        return self.model.names
