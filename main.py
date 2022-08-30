@@ -36,7 +36,18 @@ def view_webcam():
 
 
 def open_webcam():
-    print("webcam")
+    cap = cv.VideoCapture(0)
+
+    while True:
+        ret, frame = cap.read()
+
+        cv.imshow("Regist", frame)
+
+        if cv.waitKey(1) == 27:
+            break
+
+    cap.release()
+    cv.destroyAllWindows()
 
 
 def open_video(filename):
@@ -50,9 +61,9 @@ def open_video(filename):
 
         car_results = car_detector.detect(frame)
         license_results = license_detector.detect(frame)
-        cv.imshow("Video", frame)
+        cv.imshow("Regist", frame)
 
-        k = cv.waitKey(0)
+        k = cv.waitKey(1)
 
         if k == 27:
             break
@@ -65,16 +76,17 @@ def open_image(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
 
-    global car_detector
+    global car_detector, license_detector
 
-    image = cv.imread(cv.samples.findFile(filename))
+    frame = cv.imread(cv.samples.findFile(filename))
 
-    if image is None:
+    if frame is None:
         sys.exit("Could not read the image")
 
-    car_results = car_detector.detect(image)
-    image = resize_image(image)
-    cv.imshow("Image", image)
+    car_results = car_detector.detect(frame)
+    license_results = license_detector.detect(frame)
+    image = resize_image(frame)
+    cv.imshow("Regist", frame)
 
     k = cv.waitKey(0)
     # if k == "ESC":
