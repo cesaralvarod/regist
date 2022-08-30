@@ -9,6 +9,11 @@ import argparse
 import os
 import sys
 
+car_detector = ObjectDetector(model_path="yolov5m.pt", labels=[
+    "car", "motorcycle", "bus", "truck"])
+license_detector = ObjectDetector(
+    model_path="license_model.pt", labels=["license"])
+
 
 def file_exists(filename):
     return os.path.exists(filename)
@@ -38,21 +43,37 @@ def open_video(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
 
+    video = cv.VideoCapture(filename)
+
+    while video.isOpened():
+        ret, frame = video.read()
+
+        if ret == True:
+            car_results = car_detector.detect(frame)
+            license_results = license_detector.detect(frame)
+            cv.imshow("Video", frame)
+
+        k = cv.waitKey(0)
+
+        if k == 27:
+            break
+
+    video.release()
+    cv.destroyAllWindows()
+
 
 def open_image(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
-        return
+
+    global car_detector
 
     image = cv.imread(cv.samples.findFile(filename))
 
     if image is None:
         sys.exit("Could not read the image")
 
-    car_detector = ObjectDetector(model_path="yolov5m.pt", labels=[
-                                  "car", "motorcycle", "bus", "truck"])
     car_results = car_detector.detect(image)
-    print(car_results)
     image = resize_image(image)
     cv.imshow("Image", image)
 
