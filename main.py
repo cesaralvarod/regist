@@ -48,10 +48,9 @@ def open_video(filename):
     while video.isOpened():
         ret, frame = video.read()
 
-        if ret == True:
-            car_results = car_detector.detect(frame)
-            license_results = license_detector.detect(frame)
-            cv.imshow("Video", frame)
+        car_results = car_detector.detect(frame)
+        license_results = license_detector.detect(frame)
+        cv.imshow("Video", frame)
 
         k = cv.waitKey(0)
 
