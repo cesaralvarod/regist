@@ -33,9 +33,12 @@ class ObjectDetector:
             x1, y1, x2, y2, coincidence, type_obj = obj
 
             if coincidence >= self.conf and self.model.names[type_obj] in self.labels:
-                self.draw_rectangle((int(x1), int(y1)),
-                                    (int(x2), int(y2)), thickness=2)
-                self.objects.append(obj.tolist())
+                self.objects.append(
+                    self.frame[int(y1):int(y2), int(x1):int(x2)])
+
+                if draw is True:
+                    self.draw_rectangle((int(x1), int(y1)),
+                                        (int(x2), int(y2)), thickness=2)
 
                 # Write text
 

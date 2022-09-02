@@ -1,38 +1,27 @@
+import cv2 as cv
+import argparse
+import sys
+
 from config.config import *
 from classes.ObjectDetector import ObjectDetector
+from classes.LicenseReader import LicenseReader
+from helpers.helpers import *
 
-import cv2 as cv
-import torch
-import math
-import numpy as np
-import argparse
-import os
-import sys
 
 car_detector = ObjectDetector(model_path="yolov5m.pt", labels=[
     "car", "motorcycle", "bus", "truck"])
 license_detector = ObjectDetector(
     model_path="license_model.pt", labels=["license"])
+license_reader = LicenseReader()
 
 
-def file_exists(filename):
-    return os.path.exists(filename)
-
-
-def resize_image(image, scale_percent=100):
-    if image.shape[1] > 640:
-        scale_percent = 50
-    elif image.shape[1] > 480:
-        scale_percent = 100
-    else:
-        scale_percent = 200
-    dim = (int(image.shape[1]*scale_percent/100),
-           int(image.shape[0]*scale_percent/100))
-    return cv.resize(image, dsize=dim, interpolation=cv.INTER_AREA)
-
-
-def view_webcam():
-    return
+def detect_license(frame):
+    global car_detector, license_detector
+    #  car_results = car_detector.detect(frame)
+    license_results = license_detector.detect(frame)
+    #  license_reader.read(frame)
+    for license in license_results:
+        license_reader.read(license)
 
 
 def open_webcam():
@@ -40,6 +29,8 @@ def open_webcam():
 
     while True:
         ret, frame = cap.read()
+
+        detect_license(frame)
 
         cv.imshow("Regist", frame)
 
@@ -54,13 +45,12 @@ def open_video(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
 
-    video = cv.VideoCapture(filename)
+    cap = cv.VideoCapture(filename)
 
     while video.isOpened():
-        ret, frame = video.read()
+        ret, frame = cap.read()
 
-        car_results = car_detector.detect(frame)
-        license_results = license_detector.detect(frame)
+        detect_license(frame)
         cv.imshow("Regist", frame)
 
         k = cv.waitKey(1)
@@ -68,7 +58,7 @@ def open_video(filename):
         if k == 27:
             break
 
-    video.release()
+    cap.release()
     cv.destroyAllWindows()
 
 
@@ -76,21 +66,20 @@ def open_image(filename):
     if not file_exists(filename):
         sys.exit("Sorry the file we\'re looking for doesn\'t exist")
 
-    global car_detector, license_detector
-
     frame = cv.imread(cv.samples.findFile(filename))
 
     if frame is None:
         sys.exit("Could not read the image")
 
-    car_results = car_detector.detect(frame)
-    license_results = license_detector.detect(frame)
     image = resize_image(frame)
-    cv.imshow("Regist", frame)
+
+    detect_license(image)
+
+    #  cv.imshow("Regist", frame)
 
     k = cv.waitKey(0)
-    # if k == "ESC":
-    #     return
+    #  if k == 27:
+    #  return
 
 
 if __name__ == "__main__":
@@ -99,7 +88,9 @@ if __name__ == "__main__":
                         help="insert an image to recongnize")
     parser.add_argument("--video", type=str,
                         help="insert a video to recognize")
+    parser.add_argument("--cam", type=int, help="insert webcam id")
     args = parser.parse_args()
+
     if args.image:
         open_image(args.image)
     elif args.video:
