@@ -1,6 +1,8 @@
 import cv2 as cv
 import argparse
 import sys
+from tkinter import ttk
+from tkinter import *
 
 from config.config import *
 from classes.ObjectDetector import ObjectDetector
@@ -13,6 +15,9 @@ car_detector = ObjectDetector(model_path="yolov5m.pt", labels=[
 license_detector = ObjectDetector(
     model_path="license_model.pt", labels=["license"])
 license_reader = LicenseReader()
+
+window = Tk()
+frame = ttk.Frame(window, padding=10)
 
 
 def detect_license(frame):
@@ -83,6 +88,10 @@ def open_image(filename):
 
 
 if __name__ == "__main__":
+    frame.grid()
+    window.mainloop()
+
+    # Arguments
     parser = argparse.ArgumentParser(description="Car Plates Registration")
     parser.add_argument("--image", type=str,
                         help="insert an image to recongnize")
@@ -90,6 +99,8 @@ if __name__ == "__main__":
                         help="insert a video to recognize")
     parser.add_argument("--cam", type=int, help="insert webcam id")
     args = parser.parse_args()
+
+    # TODO: User Interface with tkinter
 
     if args.image:
         open_image(args.image)
