@@ -47,6 +47,7 @@ class UI:
 
         file_menu.add_command(label="Open Image")
         file_menu.add_command(label="Open Video")
+        file_menu.add_command(label="Open Webcam")
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.parent.destroy)
 
