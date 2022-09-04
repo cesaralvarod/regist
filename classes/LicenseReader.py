@@ -42,4 +42,4 @@ class LicenseReader:
         print(f"text={text}")
         # contours = self.find_contours(threshold)
 
-        cv.imshow("Frame", self.image)
+        #  cv.imshow("Frame", final)
