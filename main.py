@@ -130,6 +130,7 @@ if __name__ == "__main__":
     elif args.video:
         pass
     else:
-        init_webcam(0)
+        cam = args.cam if args.cam > 0 else 0
+        init_webcam(cam)
 
     window.mainloop()
