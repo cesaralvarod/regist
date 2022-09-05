@@ -1,15 +1,21 @@
 from tkinter import *
+from tkinter import filedialog
+from PIL import ImageTk, Image
+import cv2 as cv
+import os
+import imutils
 
 
 class UI:
-    def __init__(self, parent, title="REGIST", width="950", height="600") -> None:
+    def __init__(self, parent, cap=None, title="REGIST", width="950", height="600") -> None:
         self.parent = parent
         self.title = title
         self.geometry = f"{width}x{height}"
         self.frame = None
+        self.cap = cap
         self.init_ui()
 
-    def init_ui(self) -> None:
+    def init_ui(self):
         # Root: self.parent
         self.parent.title(self.title)
         self.parent.geometry(self.geometry)
@@ -17,10 +23,30 @@ class UI:
 
         self.create_frames()
         self.create_menu()
-        self.create_labels()
         self.create_listbox()
+        self.create_labels()
 
-    def create_frames(self) -> None:
+        self.init_webcam()
+
+    def init_webcam(self):
+        if self.cap is None:
+            self.cap = cv.VideoCapture(0)
+            self.capture_webcam()
+
+    def capture_webcam(self):
+        if self.cap is not None:
+            ret, frame = self.cap.read()
+
+            if ret is True:
+                frame = imutils.resize(frame, width=640)
+                frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+
+                im = Image.fromarray(frame)
+                img = ImageTk.PhotoImage(image=im)
+
+                self.set_webcamlabel(img, self.capture_webcam)
+
+    def create_frames(self):
         # Main Frame
         self.frame = Frame(self.parent)
         self.frame.grid()
@@ -37,7 +63,7 @@ class UI:
         self.frame2 = Frame(self.frame)
         self.frame2.grid(column=1, row=1)
 
-    def create_menu(self) -> None:
+    def create_menu(self):
        # Menu
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
@@ -45,7 +71,7 @@ class UI:
         # File Menu
         file_menu = Menu(menubar, tearoff=0)
 
-        file_menu.add_command(label="Open Image")
+        file_menu.add_command(label="Open Image", command=self.open_image)
         file_menu.add_command(label="Open Video")
         file_menu.add_command(label="Open Webcam")
         file_menu.add_separator()
@@ -54,13 +80,13 @@ class UI:
         # Help menu
         help_menu = Menu(menubar, tearoff=0)
 
-        help_menu.add_command(label="Help")
+        #  help_menu.add_command(label="Help")
 
-        # Add the File menu to the menubar
+        # Add the menus to the menubar
         menubar.add_cascade(label="File", menu=file_menu)
         menubar.add_cascade(label="Help", menu=help_menu)
 
-    def create_labels(self) -> None:
+    def create_labels(self):
         # Lbl0
         lbl0 = Label(self.frame0, text=self.title,
                      font=("Arial", 18), pady=5)
@@ -71,8 +97,7 @@ class UI:
         lbl1.grid(column=0, row=0)
 
         # Lbl2
-        self.webcamLbl = Label(
-            self.frame2, text="", width=640, height=480)
+        self.webcamLbl = Label(self.frame2, text="", width=640, height=480)
         self.webcamLbl.grid(column=0, row=0)
 
         # Lbl2
@@ -83,7 +108,7 @@ class UI:
         lbl4 = Label(self.frame1, text="Last license image", pady=20)
         lbl4.grid(column=0, row=3)
 
-    def create_listbox(self) -> None:
+    def create_listbox(self):
         # Listbox
         self.listbox = Listbox(self.frame1, width=35, height=20)
 
@@ -97,7 +122,24 @@ class UI:
         for i in range(190):
             self.listbox.insert(i, str(i))
 
-    def set_webcamlabel(self, img, fn) -> None:
+    def open_image(self):
+        path_image = filedialog.askopenfilename(
+            filetypes=[("image", ".jpg"), ("image", ".jpeg"), ("image", ".png")])
+
+        if len(path_image) > 0:
+            image = cv.imread(path_image)
+
+            img_show = imutils.resize(image[0], height=480)
+            img_show = cv.cvtColor(img_show, cv.COLOR_BGR2RGB)
+
+            im = Image.fromarray(img_show)
+            img = ImageTk.PhotoImage(image=im)
+
+            self.webcamLbl.configure(image=img)
+            self.webcamLbl.image = img
+
+    def set_webcamlabel(self, img, fn=None):
         self.webcamLbl.configure(image=img)
         self.webcamLbl.image = img
-        self.webcamLbl.after(10, fn)
+        if fn is not None:
+            self.webcamLbl.after(10, fn)

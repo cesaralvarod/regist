@@ -19,10 +19,6 @@ from helpers.helpers import *
 #  model_path="license_model.pt", labels=["license"])
 #  license_reader = LicenseReader()
 
-# Tkinter
-window = Tk()
-APP = UI(parent=window)
-
 
 #  def detect_license(frame):
 #  global car_detector, license_detector
@@ -88,31 +84,33 @@ APP = UI(parent=window)
 #  k = cv.waitKey(0)
 
 
-cap = None
+#  def view_webcam():
+    #  global cap
+    #  if cap is not None:
+        #  ret, frame = cap.read()
+
+        #  if ret == True:
+            #  frame = imutils.resize(frame, width=640)
+            #  frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+
+            #  im = Image.fromarray(frame)
+            #  img = ImageTk.PhotoImage(image=im)
+
+            #  APP.set_webcamlabel(img, view_webcam)
 
 
-def view_webcam():
-    global cap
-    if cap is not None:
-        ret, frame = cap.read()
-
-        if ret == True:
-            frame = imutils.resize(frame, width=640)
-            frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-
-            im = Image.fromarray(frame)
-            img = ImageTk.PhotoImage(image=im)
-
-            APP.set_webcamlabel(img, view_webcam)
-
-
-def init_webcam(cam):
-    global cap
-    cap = cv.VideoCapture(cam)
-    view_webcam()
+#  def init_webcam(cam):
+    #  global cap
+    #  cap = cv.VideoCapture(cam)
+    #  view_webcam()
 
 
 if __name__ == "__main__":
+    cap = None
+
+    # Tkinter
+    window = Tk()
+
     # Arguments
     parser = argparse.ArgumentParser(description="Car Plates Registration")
     parser.add_argument("--image", type=str,
@@ -125,11 +123,12 @@ if __name__ == "__main__":
     # Args conditional
 
     if args.image:
-        # Working!
         pass
     elif args.video:
         pass
     else:
-        init_webcam(0)
+        # Working!
+        APP = UI(parent=window, cap=cap)
+        #  init_webcam(0)
 
     window.mainloop()
