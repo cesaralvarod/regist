@@ -33,8 +33,7 @@ class UI:
 
     def init_webcam(self):
         if self.cap is None:
-            print("hola estamos aca")
-            if self.mode == "webcam" or self.mode == "video":
+            if self.mode == "webcam":
                 self.video_speed = 10
                 self.cap = cv.VideoCapture(0)
                 self.capture_webcam()
@@ -121,19 +120,17 @@ class UI:
     # ----------- Capture webcam ---------------
 
     def capture_webcam(self):
-        if self.cap is not None:
-            if self.mode != "image":
+        if self.cap is not None and self.mode != "image":
+            ret, frame = self.cap.read()
 
-                ret, frame = self.cap.read()
+            if ret is True:
+                frame = imutils.resize(frame, width=640)
+                frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
-                if ret is True:
-                    frame = imutils.resize(frame, width=640)
-                    frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+                im = Image.fromarray(frame)
+                img = ImageTk.PhotoImage(image=im)
 
-                    im = Image.fromarray(frame)
-                    img = ImageTk.PhotoImage(image=im)
-
-                    self.set_webcamlabel(img, self.capture_webcam)
+                self.set_webcamlabel(img, self.capture_webcam)
 
     # ---------------- Others functions ----------------------
 
@@ -160,9 +157,11 @@ class UI:
             self.webcamLbl.image = img
 
     def open_webcam(self):
-        self.mode = "webcam"
-        self.cap = cv.VideoCapture(0)
-        self.capture_webcam()
+        if self.mode != "webcam":
+            self.video_speed = 10
+            self.mode = "webcam"
+            self.cap = cv.VideoCapture(0)
+            self.capture_webcam()
 
     def open_video(self):
         path_video = filedialog.askopenfilename(
@@ -170,17 +169,18 @@ class UI:
 
         if len(path_video) > 0:
             self.cap = cv.VideoCapture(path_video)
+            self.mode = "video"
 
             if self.cap is None:
                 self.mode = "webcam"
                 return
 
-            self.mode = "video"
             self.video_speed = 40
             self.capture_webcam()
 
     def set_webcamlabel(self, img, fn=None):
         self.webcamLbl.configure(image=img)
         self.webcamLbl.image = img
+
         if fn is not None:
             self.webcamLbl.after(self.video_speed, fn)
