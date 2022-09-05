@@ -13,6 +13,9 @@ class UI:
         self.geometry = f"{width}x{height}"
         self.frame = None
         self.cap = cap
+        self.mode = "webcam"
+        self.video_speed = 10
+
         self.init_ui()
 
     def init_ui(self):
@@ -30,21 +33,13 @@ class UI:
 
     def init_webcam(self):
         if self.cap is None:
-            self.cap = cv.VideoCapture(0)
-            self.capture_webcam()
+            print("hola estamos aca")
+            if self.mode == "webcam" or self.mode == "video":
+                self.video_speed = 10
+                self.cap = cv.VideoCapture(0)
+                self.capture_webcam()
 
-    def capture_webcam(self):
-        if self.cap is not None:
-            ret, frame = self.cap.read()
-
-            if ret is True:
-                frame = imutils.resize(frame, width=640)
-                frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-
-                im = Image.fromarray(frame)
-                img = ImageTk.PhotoImage(image=im)
-
-                self.set_webcamlabel(img, self.capture_webcam)
+    # -------- Widgets ---------------
 
     def create_frames(self):
         # Main Frame
@@ -72,15 +67,15 @@ class UI:
         file_menu = Menu(menubar, tearoff=0)
 
         file_menu.add_command(label="Open Image", command=self.open_image)
-        file_menu.add_command(label="Open Video")
-        file_menu.add_command(label="Open Webcam")
+        file_menu.add_command(label="Open Video", command=self.open_video)
+        file_menu.add_command(label="Open Webcam", command=self.open_webcam)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.parent.destroy)
 
         # Help menu
         help_menu = Menu(menubar, tearoff=0)
 
-        #  help_menu.add_command(label="Help")
+        help_menu.add_command(label="Help")
 
         # Add the menus to the menubar
         menubar.add_cascade(label="File", menu=file_menu)
@@ -119,17 +114,43 @@ class UI:
 
         self.listbox.grid(column=0, row=1)
         scrollbar.grid(column=1, row=1, sticky=N+S)
-        for i in range(190):
-            self.listbox.insert(i, str(i))
+
+        #  for i in range(190):
+        #  self.listbox.insert(i, str(i))
+
+    # ----------- Capture webcam ---------------
+
+    def capture_webcam(self):
+        if self.cap is not None:
+            if self.mode != "image":
+
+                ret, frame = self.cap.read()
+
+                if ret is True:
+                    frame = imutils.resize(frame, width=640)
+                    frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+
+                    im = Image.fromarray(frame)
+                    img = ImageTk.PhotoImage(image=im)
+
+                    self.set_webcamlabel(img, self.capture_webcam)
+
+    # ---------------- Others functions ----------------------
 
     def open_image(self):
         path_image = filedialog.askopenfilename(
             filetypes=[("image", ".jpg"), ("image", ".jpeg"), ("image", ".png")])
 
         if len(path_image) > 0:
-            image = cv.imread(path_image)
+            self.cap = cv.imread(path_image)
 
-            img_show = imutils.resize(image[0], height=480)
+            if self.cap is None:
+                self.mode = "webcam"
+                return
+
+            self.mode = "image"
+
+            img_show = imutils.resize(self.cap, width=640, height=480)
             img_show = cv.cvtColor(img_show, cv.COLOR_BGR2RGB)
 
             im = Image.fromarray(img_show)
@@ -138,8 +159,28 @@ class UI:
             self.webcamLbl.configure(image=img)
             self.webcamLbl.image = img
 
+    def open_webcam(self):
+        self.mode = "webcam"
+        self.cap = cv.VideoCapture(0)
+        self.capture_webcam()
+
+    def open_video(self):
+        path_video = filedialog.askopenfilename(
+            filetypes=[("all video format", ".avi"), ("all video format", ".mp4")])
+
+        if len(path_video) > 0:
+            self.cap = cv.VideoCapture(path_video)
+
+            if self.cap is None:
+                self.mode = "webcam"
+                return
+
+            self.mode = "video"
+            self.video_speed = 40
+            self.capture_webcam()
+
     def set_webcamlabel(self, img, fn=None):
         self.webcamLbl.configure(image=img)
         self.webcamLbl.image = img
         if fn is not None:
-            self.webcamLbl.after(10, fn)
+            self.webcamLbl.after(self.video_speed, fn)
