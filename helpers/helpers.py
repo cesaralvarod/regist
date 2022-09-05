@@ -13,7 +13,7 @@ def resize_image(image, scale_percent=100):
         scale_percent = 100
     else:
         scale_percent = 200
-        
+
     dim = (int(image.shape[1]*scale_percent/100),
            int(image.shape[0]*scale_percent/100))
     return cv.resize(image, dsize=dim, interpolation=cv.INTER_AREA)

@@ -5,9 +5,11 @@ import cv2 as cv
 import os
 import imutils
 
+# TODO: Fix bug when change mode video to webcam
+
 
 class UI:
-    def __init__(self, parent, cap=None, title="REGIST", width="950", height="600") -> None:
+    def __init__(self, parent, cap=None, detector=None, title="REGIST", width="950", height="600") -> None:
         self.parent = parent
         self.title = title
         self.geometry = f"{width}x{height}"
@@ -15,6 +17,7 @@ class UI:
         self.cap = cap
         self.mode = "webcam"
         self.video_speed = 10
+        self.detector = detector
 
         self.init_ui()
 
@@ -30,13 +33,6 @@ class UI:
         self.create_labels()
 
         self.init_webcam()
-
-    def init_webcam(self):
-        if self.cap is None:
-            if self.mode == "webcam":
-                self.video_speed = 10
-                self.cap = cv.VideoCapture(0)
-                self.capture_webcam()
 
     # -------- Widgets ---------------
 
@@ -99,8 +95,9 @@ class UI:
         lbl2.grid(column=0, row=2)
 
         # Lbl4
-        lbl4 = Label(self.frame1, text="Last license image", pady=20)
-        lbl4.grid(column=0, row=3)
+        self.licenseLbl = Label(
+            self.frame1, text="Last license image", pady=20)
+        self.licenseLbl.grid(column=0, row=3)
 
     def create_listbox(self):
         # Listbox
@@ -117,6 +114,14 @@ class UI:
         #  for i in range(190):
         #  self.listbox.insert(i, str(i))
 
+    def init_webcam(self):
+
+        if self.cap is None:
+            if self.mode == "webcam":
+                self.video_speed = 10
+                self.cap = cv.VideoCapture(0)
+                self.capture_webcam()
+
     # ----------- Capture webcam ---------------
 
     def capture_webcam(self):
@@ -124,6 +129,8 @@ class UI:
             ret, frame = self.cap.read()
 
             if ret is True:
+                self.detector(frame)
+
                 frame = imutils.resize(frame, width=640)
                 frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
@@ -139,11 +146,13 @@ class UI:
             filetypes=[("image", ".jpg"), ("image", ".jpeg"), ("image", ".png")])
 
         if len(path_image) > 0:
-            self.cap = cv.imread(path_image)
+            self.cap = cv.imread(cv.samples.findFile(path_image))
 
             if self.cap is None:
                 self.mode = "webcam"
                 return
+
+            self.detector(self.cap)
 
             self.mode = "image"
 
@@ -158,10 +167,9 @@ class UI:
 
     def open_webcam(self):
         if self.mode != "webcam":
-            self.video_speed = 10
             self.mode = "webcam"
-            self.cap = cv.VideoCapture(0)
-            self.capture_webcam()
+            self.cap = None
+            self.init_webcam()
 
     def open_video(self):
         path_video = filedialog.askopenfilename(
@@ -184,3 +192,13 @@ class UI:
 
         if fn is not None:
             self.webcamLbl.after(self.video_speed, fn)
+
+    def set_licenselabel(self, img):
+        img_show = imutils.resize(img, width=200)
+        img_show = cv.cvtColor(img_show, cv.COLOR_BGR2RGB)
+
+        im = Image.fromarray(img_show)
+        img = ImageTk.PhotoImage(image=im)
+
+        self.licenseLbl.configure(image=img)
+        self.licenseLbl.image = img
