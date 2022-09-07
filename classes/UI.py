@@ -9,7 +9,7 @@ import imutils
 
 
 class UI:
-    def __init__(self, parent, cap=None, detector=None, title="REGIST", width="950", height="600") -> None:
+    def __init__(self, parent, cap=None, detector=None, title="REGIST", width="950", height="620") -> None:
         self.parent = parent
         self.title = title
         self.geometry = f"{width}x{height}"
@@ -91,13 +91,18 @@ class UI:
         self.webcamLbl.grid(column=0, row=0)
 
         # Lbl2
-        lbl2 = Label(self.frame1, text="Last car license:", pady=10)
+        lbl2 = Label(self.frame1, text="Last car license detected:", pady=10)
         lbl2.grid(column=0, row=2)
 
         # Lbl4
         self.licenseLbl = Label(
-            self.frame1, text="Last license image", pady=20)
+            self.frame1, text="", pady=20)
         self.licenseLbl.grid(column=0, row=3)
+
+        # Lbl5
+        self.textLicenseLbl = Label(
+            self.frame1, text="", pady=10, font=("Arial", 15, "bold"))
+        self.textLicenseLbl.grid(column=0, row=4)
 
     def create_listbox(self):
         # Listbox
@@ -193,7 +198,13 @@ class UI:
         if fn is not None:
             self.webcamLbl.after(self.video_speed, fn)
 
-    def set_licenselabel(self, img):
+    def set_licenselabel(self, img, text):
+        if img is None:
+            self.licenseLbl.configure(image="")
+            self.licenseLbl.image = ""
+            self.textLicenseLbl["text"] = ""
+            return
+
         img_show = imutils.resize(img, width=200)
         img_show = cv.cvtColor(img_show, cv.COLOR_BGR2RGB)
 
@@ -202,3 +213,5 @@ class UI:
 
         self.licenseLbl.configure(image=img)
         self.licenseLbl.image = img
+
+        self.textLicenseLbl["text"] = text

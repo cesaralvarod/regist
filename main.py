@@ -15,9 +15,8 @@ def detect_license(frame):
     license_results = license_detector.detect(frame)
     if len(license_results) > 0:
         for license in license_results:
-            APP.set_licenselabel(license)
-            license_reader.read(license)
-
+            text = license_reader.read(license)
+            APP.set_licenselabel(license, text)
 
     # Main
 if __name__ == "__main__":
