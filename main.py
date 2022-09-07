@@ -10,7 +10,7 @@ from helpers.helpers import *
 
 
 def detect_license(frame):
-    global car_detector, license_detector
+    global APP, license_detector
     #  car_results = car_detector.detect(frame)
     license_results = license_detector.detect(frame)
     if len(license_results) > 0:
