@@ -13,17 +13,20 @@ def detect_license(frame):
     global APP, license_detector
     #  car_results = car_detector.detect(frame)
     license_results = license_detector.detect(frame)
+    licenses = []
     if len(license_results) > 0:
         for license in license_results:
             text = license_reader.read(license)
+            licenses.append(text)
             APP.set_licenselabel(license, text)
+        APP.insert_licenses(licenses)
 
     # Main
 if __name__ == "__main__":
     # Objects
     #  car_detector = ObjectDetector(model_path="yolov5m.pt", labels=["car", "motorcycle", "bus", "truck"])
     license_detector = ObjectDetector(
-        model_path="license_model.pt", labels=["license"])
+        model_path="license_model.pt", labels=["license"], conf=0.85)
     license_reader = LicenseReader()
 
     cap = None

@@ -124,7 +124,7 @@ class UI:
         if self.cap is None:
             if self.mode == "webcam":
                 self.video_speed = 10
-                self.cap = cv.VideoCapture(0)
+                self.cap = cv.VideoCapture(1)
                 self.capture_webcam()
 
     # ----------- Capture webcam ---------------
@@ -151,6 +151,9 @@ class UI:
             filetypes=[("image", ".jpg"), ("image", ".jpeg"), ("image", ".png")])
 
         if len(path_image) > 0:
+            self.listbox.delete(0, END)
+            self.set_licenselabel(img=None)
+
             self.cap = cv.imread(cv.samples.findFile(path_image))
 
             if self.cap is None:
@@ -172,6 +175,9 @@ class UI:
 
     def open_webcam(self):
         if self.mode != "webcam":
+            self.listbox.delete(0, END)
+            self.set_licenselabel(img=None)
+
             self.mode = "webcam"
             self.cap = None
             self.init_webcam()
@@ -181,6 +187,9 @@ class UI:
             filetypes=[("all video format", ".avi"), ("all video format", ".mp4")])
 
         if len(path_video) > 0:
+            self.listbox.delete(0, END)
+            self.set_licenselabel(img=None)
+
             self.cap = cv.VideoCapture(path_video)
             self.mode = "video"
 
@@ -198,7 +207,7 @@ class UI:
         if fn is not None:
             self.webcamLbl.after(self.video_speed, fn)
 
-    def set_licenselabel(self, img, text):
+    def set_licenselabel(self, img, text=""):
         if img is None:
             self.licenseLbl.configure(image="")
             self.licenseLbl.image = ""
@@ -215,3 +224,10 @@ class UI:
         self.licenseLbl.image = img
 
         self.textLicenseLbl["text"] = text
+
+    def insert_licenses(self, items=[]):
+        self.listbox.delete(0, END)
+
+        for index, item in enumerate(items, start=0):
+            if item != "":
+                self.listbox.insert(index, item)

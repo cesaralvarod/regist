@@ -76,7 +76,7 @@ class LicenseReader:
             """
 
             text_readed = reader.readtext(self.image, paragraph=True)
-            regex = " \\()*&^%$#@!~`\'\"[]{}<>/.,;-_=+"
+            regex = " \\()*&^%$#@!~`\'\"[]{}<>/.,;-_=+:"
 
             for line in text_readed:
                 license = line[1]
