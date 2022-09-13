@@ -6,7 +6,8 @@ from config.config import *
 from classes.ObjectDetector import ObjectDetector
 from classes.LicenseReader import LicenseReader
 from classes.UI import UI
-from helpers.helpers import *
+
+#  from helpers.telegram import send_image
 
 
 def detect_license(frame):

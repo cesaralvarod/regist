@@ -1,8 +1,7 @@
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from PIL import ImageTk, Image
 import cv2 as cv
-import os
 import imutils
 
 # TODO: Fix bug when change mode video to webcam
@@ -116,16 +115,17 @@ class UI:
         self.listbox.grid(column=0, row=1)
         scrollbar.grid(column=1, row=1, sticky=N+S)
 
-        #  for i in range(190):
-        #  self.listbox.insert(i, str(i))
-
     def init_webcam(self):
 
         if self.cap is None:
             if self.mode == "webcam":
                 self.video_speed = 10
                 self.cap = cv.VideoCapture(1)
-                self.capture_webcam()
+                if self.cap is not None:
+                    self.capture_webcam()
+                else:
+                    messagebox.showerror(
+                        "Camera not found", "Please connect other webcam to your device")
 
     # ----------- Capture webcam ---------------
 
