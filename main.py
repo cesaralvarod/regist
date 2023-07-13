@@ -9,7 +9,6 @@ from classes.UI import UI
 
 #  from helpers.telegram import send_image
 
-
 def detect_license(frame):
     global APP, license_detector
     #  car_results = car_detector.detect(frame)

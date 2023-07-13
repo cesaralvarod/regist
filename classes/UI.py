@@ -6,7 +6,6 @@ import imutils
 
 # TODO: Fix bug when change mode video to webcam
 
-
 class UI:
     def __init__(self, parent, cap=None, detector=None, title="REGIST", width="950", height="620") -> None:
         self.parent = parent
@@ -120,7 +119,7 @@ class UI:
         if self.cap is None:
             if self.mode == "webcam":
                 self.video_speed = 10
-                self.cap = cv.VideoCapture(1)
+                self.cap = cv.VideoCapture(0)
                 if self.cap is not None:
                     self.capture_webcam()
                 else:

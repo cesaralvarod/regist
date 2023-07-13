@@ -1,7 +1,7 @@
 import cv2 as cv
 import skimage
 #  import pytesseract
-import numpy as np
+# import numpy as np
 import easyocr
 
 reader = easyocr.Reader(["en"], gpu=False)
