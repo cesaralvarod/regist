@@ -6,13 +6,13 @@ class CarLicenseReader:
         self.image = None
 
     def apply_thresh(self):
-        gray = cv.cvtColor(self.image, cv.COLORBGR2GRAY)
-        thresh = cv.threshold(gray, 170, 255, cv.THRESH_BINARY_INV)[1]
+        gray = cv2.cvtColor(self.image, cv2.COLORBGR2GRAY)
+        thresh = cv2.threshold(gray, 170, 255, cv2.THRESH_BINARY_INV)[1]
         return thresh
 
     def get_contours(self):
-        contours = cv.findContours(
-            self.image, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+        contours = cv2.findContours(
+            self.image, cv2.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
 
     def read_license(self, image):
         self.image = image

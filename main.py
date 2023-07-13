@@ -2,9 +2,6 @@ from config.config import *
 from classes.ObjectDetector import ObjectDetector
 
 import cv2 as cv
-import torch
-import math
-import numpy as np
 import argparse
 import os
 import sys
@@ -55,8 +52,8 @@ def open_image(filename):
     cv.imshow("Image", image)
 
     k = cv.waitKey(0)
-    # if k == "ESC":
-    #     return
+    if k == "ESC":
+        return
 
 
 if __name__ == "__main__":
