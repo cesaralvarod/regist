@@ -4,18 +4,17 @@ from PIL import ImageTk, Image
 import cv2 as cv
 import imutils
 
-# TODO: Fix bug when change mode video to webcam
-
 class UI:
-    def __init__(self, parent, cap=None, detector=None, title="REGIST", width="950", height="620") -> None:
+    def __init__(self, parent, cap=None, detector=None, title="SRMV", width="960", height="680"):
         self.parent = parent
         self.title = title
         self.geometry = f"{width}x{height}"
         self.frame = None
         self.cap = cap
         self.mode = "webcam"
-        self.video_speed = 10
+        self.video_speed = 5
         self.detector = detector
+        self.cam_num=1
 
         self.init_ui()
 
@@ -75,24 +74,20 @@ class UI:
         menubar.add_cascade(label="Help", menu=help_menu)
 
     def create_labels(self):
-        # Lbl0
+        # Title
         lbl0 = Label(self.frame0, text=self.title,
                      font=("Arial", 18), pady=5)
         lbl0.grid(column=0, row=0, columnspan=2, sticky=EW)
 
-        # Lbl1
+        # Text
         lbl1 = Label(self.frame1, text="Car licenses found")
         lbl1.grid(column=0, row=0)
 
-        # Lbl2
-        self.webcamLbl = Label(self.frame2, text="", width=640, height=480)
-        self.webcamLbl.grid(column=0, row=0)
-
-        # Lbl2
+        # Text
         lbl2 = Label(self.frame1, text="Last car license detected:", pady=10)
         lbl2.grid(column=0, row=2)
 
-        # Lbl4
+        # Last License label
         self.licenseLbl = Label(
             self.frame1, text="", pady=20)
         self.licenseLbl.grid(column=0, row=3)
@@ -101,6 +96,10 @@ class UI:
         self.textLicenseLbl = Label(
             self.frame1, text="", pady=10, font=("Arial", 15, "bold"))
         self.textLicenseLbl.grid(column=0, row=4)
+
+        # webcam
+        self.webcamLbl = Label(self.frame2, text="", width=640, height=480)
+        self.webcamLbl.grid(column=0, row=0)
 
     def create_listbox(self):
         # Listbox
@@ -115,16 +114,20 @@ class UI:
         scrollbar.grid(column=1, row=1, sticky=N+S)
 
     def init_webcam(self):
-
         if self.cap is None:
-            if self.mode == "webcam":
-                self.video_speed = 10
-                self.cap = cv.VideoCapture(0)
-                if self.cap is not None:
-                    self.capture_webcam()
+            self.video_speed = 10
+            self.cap = cv.VideoCapture(self.cam_num)
+
+            if self.cap.isOpened() is False:
+                if self.cam_num>=0:
+                    self.cap=None
+                    self.cam_num= self.cam_num-1
+                    self.init_webcam()
                 else:
-                    messagebox.showerror(
-                        "Camera not found", "Please connect other webcam to your device")
+                    self.parent.destroy()
+            else:
+                self.capture_webcam()
+                    
 
     # ----------- Capture webcam ---------------
 
@@ -133,17 +136,23 @@ class UI:
             ret, frame = self.cap.read()
 
             if ret is True:
-                self.detector(frame)
-
                 frame = imutils.resize(frame, width=640)
                 frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+
+                # make area of interest
+                (x1,y1),(x2,y2)=(20,120), (620,420)
+                area_interesed=frame[y1:y2, x1:x2]
+                
+                self.detector(area_interesed)
+
+                cv.rectangle(frame, (x1,y1), (x2, y2), (255,255,0), 1)
 
                 im = Image.fromarray(frame)
                 img = ImageTk.PhotoImage(image=im)
 
                 self.set_webcamlabel(img, self.capture_webcam)
 
-    # ---------------- Others functions ----------------------
+    # ---------------- Others functions for menu ----------------------
 
     def open_image(self):
         path_image = filedialog.askopenfilename(
@@ -225,8 +234,8 @@ class UI:
         self.textLicenseLbl["text"] = text
 
     def insert_licenses(self, items=[]):
-        self.listbox.delete(0, END)
+        # self.listbox.delete(0, END)
 
         for index, item in enumerate(items, start=0):
             if item != "":
-                self.listbox.insert(index, item)
+                self.listbox.insert(index, f"{index+1}. {item}")

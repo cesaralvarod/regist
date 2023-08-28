@@ -3,6 +3,7 @@ import cv2 as cv
 import numpy as np
 import os
 import sys
+import math
 
 
 class ObjectDetector:
@@ -12,7 +13,10 @@ class ObjectDetector:
         self.conf = conf if conf < 1 and conf >= 0 else 1.0
         self.labels = labels
         self.objects = []
+        self.obj_parameters=[]
         self.results = None
+        self.center_points={}
+        self.id_count=1
 
         self.load_model()
 
@@ -20,6 +24,7 @@ class ObjectDetector:
         if not os.path.exists(self.model_path):
             sys.exit("Model not found")
 
+        # Load model
         self.model = torch.hub.load(
             "ultralytics/yolov5", 'custom', self.model_path, force_reload=True)
 
@@ -29,6 +34,8 @@ class ObjectDetector:
         objects = np.array(self.results.xyxy[0])
         self.objects = []
 
+        objects_id=[]
+
         for obj in objects:
             x1, y1, x2, y2, coincidence, type_obj = obj
 
@@ -37,22 +44,12 @@ class ObjectDetector:
                     self.frame[int(y1):int(y2), int(x1):int(x2)])
 
                 if draw is True:
-                    self.draw_rectangle((int(x1), int(y1)),
-                                        (int(x2), int(y2)), thickness=2)
-
-                # Write text
-
-                # label_text = self.set_labeltext(type_obj)
-                # roi = self.frame[int(y1):int(y2), int(x1):int(x2)]
-                # cv.rectangle(self.frame, c1,
-                #              (int(x1) + len(label_text) * 20 + 10, int(y1)-40), (0, 255, 0), -1)
-                # cv.putText(self.frame, label_text, (int(x1)+10, int(y1)-10),
-                #            cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+                    cv.rectangle(self.frame, (int(x1), int(y1)), (int(x2),int(y2)), (0,255,0), 2)
+                    coincidence_text=round(coincidence*100,2)
+                    cv.putText(self.frame, f"{coincidence_text}%", (int(x1)+10, int(y1)-10), 
+                               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv.LINE_AA)
 
         return self.objects
-
-    def draw_rectangle(self, c1, c2, color=(0, 255, 0), thickness=1):
-        cv.rectangle(self.frame, c1, c2, color, thickness)
 
     def get_labels(self):
         return self.model.names
